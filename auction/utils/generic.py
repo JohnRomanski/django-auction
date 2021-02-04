@@ -4,7 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 def get_bidbasket_from_database(request):
     try:
         return BidBasket.objects.filter(user=request.user)[0]
-    except Exception, e:
+    except Exception as e:
         return False
 
 def get_or_create_bidbasket(request, save=False):

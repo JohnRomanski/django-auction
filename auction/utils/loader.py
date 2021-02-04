@@ -5,8 +5,7 @@ These utils are ripped directly from Django-Shop.
 
 from django.conf import settings
 from django.core import exceptions
-from django.utils.importlib import import_module
-
+from importlib import import_module
 
 CLASS_PATH_ERROR = 'django-auction is unable to interpret settings value for %s. '\
                    '%s should be in the form of a tupple: '\
@@ -21,7 +20,7 @@ def load_class(class_path, setting_name=None):
     The setting_name parameter is only there for pretty error output, and
     therefore is optional
     """
-    if not isinstance(class_path, basestring):
+    if not isinstance(class_path, str):
         try:
             class_path, app_label = class_path
         except:
@@ -41,10 +40,9 @@ def load_class(class_path, setting_name=None):
         else:
             txt = '%s isn\'t a valid module.' % class_path
         raise exceptions.ImproperlyConfigured(txt)
-
     try:
         mod = import_module(class_module)
-    except ImportError, e:
+    except ImportError as e:
         if setting_name:
             txt = 'Error importing backend %s: "%s". Check your %s setting' % (
                 class_module, e, setting_name)
@@ -78,11 +76,11 @@ def get_model_string(model_name):
 
     if not class_path:
         return 'auction.%s' % model_name
-    elif isinstance(class_path, basestring):
+    elif isinstance(class_path, str):
         parts = class_path.split('.')
         try:
             index = parts.index('models') - 1
-        except ValueError, e:
+        except ValueError as e:
             raise exceptions.ImproperlyConfigured(CLASS_PATH_ERROR % (
                 setting_name, setting_name))
         app_label, model_name = parts[index], parts[-1]

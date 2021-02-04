@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.views.generic.edit import FormView
 from django.views.generic.detail import SingleObjectMixin
 from django.shortcuts import get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 import auction.models
 import auction.forms

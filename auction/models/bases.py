@@ -1,18 +1,15 @@
 from decimal import Decimal
 from django.db import models
-from polymorphic.polymorphic_model import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from auction.utils.loader import get_model_string
-from south.modelsinspector import add_introspection_rules
 from django.conf import settings
 
-add_introspection_rules([], ["^auction\.models\.bases\.CurrencyField"])
 
 class CurrencyField(models.DecimalField):
-    __metaclass__ = models.SubfieldBase
 
     def to_python(self, value):
         try:
@@ -45,7 +42,7 @@ class BaseBidBasket(models.Model):
     """
     This models functions similarly to a shopping cart, except it expects a logged in user.
     """
-    user = models.OneToOneField(User, related_name="%(app_label)s_%(class)s_related", verbose_name=_('User'))
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_related", verbose_name=_('User'))
     date_added = models.DateTimeField(auto_now_add=True, verbose_name=_('Date added'))
     last_modified = models.DateTimeField(auto_now=True, verbose_name=_('Last modified'))
 
@@ -64,7 +61,7 @@ class BaseBidBasket(models.Model):
 
         try:
             amount = Decimal(amount)
-        except Exception, e:
+        except Exception as e:
             amount = Decimal('0')
 
         from auction.models.lot import Lot
@@ -83,7 +80,7 @@ class BaseBidBasket(models.Model):
 
         try:
             amount = Decimal(amount)
-        except Exception, e:
+        except Exception as e:
             amount = Decimal('0')
 
         bid_basket_item = self.bids.get(pk=bid_basket_item_id)
@@ -141,10 +138,10 @@ class BaseAuctionLot(PolymorphicModel):
     slug = models.SlugField(auto_created=True, verbose_name=_('Slug'))
     active = models.BooleanField(default=False, verbose_name=_('Active'))
     is_biddable = models.BooleanField(default=False, verbose_name=_('Is biddable?'))
-    content_type = models.ForeignKey(ContentType, related_name="%(app_label)s_%(class)s_lots",
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_lots",
                                      verbose_name=_('Content type'))
     object_id = models.PositiveIntegerField(verbose_name=_('Object ID'))
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     date_added = models.DateTimeField(auto_now_add=True, verbose_name=_('Date added'))
     last_modified = models.DateTimeField(auto_now=True, verbose_name=_('Last modified'))
 
@@ -173,10 +170,10 @@ class BaseBidItem(models.Model):
     item being bid on.
     """
 
-    bid_basket = models.ForeignKey(get_model_string("BidBasket"), related_name="%(app_label)s_%(class)s_related", verbose_name=_('Bid basket'))
-    content_type = models.ForeignKey(ContentType, related_name="%(app_label)s_%(class)s_related", verbose_name=_('Content type'))
+    bid_basket = models.ForeignKey(get_model_string("BidBasket"), on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_related", verbose_name=_('Bid basket'))
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_related", verbose_name=_('Content type'))
     lot_id = models.PositiveIntegerField(verbose_name=_('Lot ID'))
-    lot_object = generic.GenericForeignKey('content_type', 'lot_id')
+    lot_object = GenericForeignKey('content_type', 'lot_id')
     amount = CurrencyField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name=_('Amount'))
 
     class Meta:
