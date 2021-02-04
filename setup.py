@@ -16,12 +16,6 @@ CLASSIFIERS = [
 with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
     REQUIREMENTS = f.read().splitlines()
 
-try:
-    import importlib
-except ImportError:
-    # importlib is not included in python2.6
-    REQUIREMENTS.append('importlib')
-
 setup(
     author="Joe Curlee",
     author_email="joe.curlee@gmail.com",
@@ -36,8 +30,6 @@ setup(
     install_requires=REQUIREMENTS,
     tests_require=[
         'django-nose',
-        'coverage',
-        'django-coverage',
     ],
     packages=find_packages(),
     include_package_data=True,
